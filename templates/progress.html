@@ -1,0 +1,188 @@
+{% extends "_app_shell.html" %}
+{% load tf_extras %}
+
+{% block title %}{{ client.full_name }} progress — TrainForge{% endblock %}
+{% block page_label %}{{ client.full_name }} — Progress{% endblock %}
+
+{% block topbar_actions %}
+  <a href="{% url 'session_log_create' client_id=client.id %}" class="btn btn-primary"><i class="bi bi-journal-plus me-1"></i>Log session</a>
+  <a href="{% url 'progress_index' %}" class="btn btn-outline-ink"><i class="bi bi-arrow-left me-1"></i>All clients</a>
+{% endblock %}
+
+{% block content %}
+<div class="d-flex align-items-center gap-3 mb-4">
+  <div class="tf-avatar tf-avatar-lg" style="background: {{ client.avatar_color|default:'#94C2DA' }};">{{ client.initials }}</div>
+  <div>
+    <h1>{{ client.full_name }}</h1>
+    <div class="text-muted-warm small">{{ client.get_goal_display }} · {{ client.weekly_frequency }} days/week</div>
+  </div>
+</div>
+
+<div class="row g-3 mb-4">
+  <div class="col-md-4">
+    <div class="card tf-card p-3">
+      <div class="tf-mono text-uppercase small text-muted-warm" style="font-size:10px;">Sessions logged</div>
+      <div class="font-display display-5 stat-num">{{ total_sessions }}</div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card tf-card p-3">
+      <div class="tf-mono text-uppercase small text-muted-warm" style="font-size:10px;">Personal records</div>
+      <div class="font-display display-5 stat-num">{{ total_pr_count }}</div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card tf-card p-3">
+      <div class="tf-mono text-uppercase small text-muted-warm" style="font-size:10px;">Total volume (kg)</div>
+      <div class="font-display display-5 stat-num">{{ total_volume|floatformat:0 }}</div>
+    </div>
+  </div>
+</div>
+
+<div class="row g-4">
+
+  <div class="col-12">
+    <div class="card tf-card p-4">
+      <div class="d-flex justify-content-between align-items-end mb-3 flex-wrap gap-2">
+        <div>
+          <div class="tf-mono text-uppercase small text-muted-warm mb-1" style="font-size:10px;">Top-set weight</div>
+          <h2 class="fs-3 mb-0">Strength over time</h2>
+        </div>
+        <form method="get" class="d-flex flex-wrap gap-2">
+          {% for e in exercises_used %}
+            <button class="tf-chip {% if selected_ex_id == e.id %}active{% endif %}" name="exercise" value="{{ e.id }}">{{ e.name }}</button>
+          {% endfor %}
+        </form>
+      </div>
+      <div style="position: relative; height: 320px;">
+        <canvas id="topSetChart"></canvas>
+      </div>
+      {% if not top_set_series %}
+        <div class="empty-state"><i class="bi bi-graph-up display-6 d-block mb-2 text-muted-warm"></i>No sets logged yet.</div>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="col-lg-5 d-flex">
+    <div class="card tf-card p-4 flex-fill">
+      <div class="mb-3">
+        <div class="tf-mono text-uppercase small text-muted-warm mb-1" style="font-size:10px;">Weekly volume</div>
+        <h2 class="fs-3 mb-0">Sets × reps × weight</h2>
+      </div>
+      <div style="position: relative; height: 240px;">
+        <canvas id="volumeChart"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-4 d-flex">
+    <div class="card tf-card p-4 flex-fill" style="overflow: hidden;">
+      <div class="mb-3">
+        <div class="tf-mono text-uppercase small text-muted-warm mb-1" style="font-size:10px;">Recent</div>
+        <h2 class="fs-3 mb-0">Personal records</h2>
+      </div>
+      {% if recent_prs %}
+        <ul class="list-unstyled mb-0">
+          {% for s in recent_prs %}
+            <li class="d-flex justify-content-between border-bottom py-2 small">
+              <div class="text-truncate" style="min-width: 0;">
+                <div class="fw-medium text-truncate">{{ s.exercise.name }}</div>
+                <div class="text-muted-warm">{{ s.session.performed_on|date:"j M Y" }}</div>
+              </div>
+              <div class="text-end" style="flex-shrink: 0;">
+                <div class="tf-mono fs-6">{{ s.weight_kg }} kg</div>
+                <div class="text-muted-warm">{{ s.reps }} reps</div>
+              </div>
+            </li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <div class="text-muted-warm small">No PRs yet.</div>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="col-lg-3" style="align-self: flex-start;">
+    <div class="card tf-card p-4">
+      <div class="mb-3">
+        <div class="tf-mono text-uppercase small text-muted-warm mb-1" style="font-size:10px;">Last 90 days</div>
+        <h2 class="fs-3 mb-0">Consistency</h2>
+      </div>
+      <div class="d-flex flex-wrap" style="gap: 2px;">
+        {% for cell in heatmap %}
+          <span class="heatmap-cell {% if cell.logged %}heatmap-3{% else %}heatmap-0{% endif %}" title="{{ cell.date }}" style="width: 10px; height: 10px;"></span>
+        {% endfor %}
+      </div>
+      <div class="small text-muted-warm mt-3 d-flex gap-3 align-items-center flex-wrap">
+        <span><span class="heatmap-cell heatmap-0 align-middle" style="width:10px;height:10px;"></span> Rest</span>
+        <span><span class="heatmap-cell heatmap-3 align-middle" style="width:10px;height:10px;"></span> Logged</span>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script id="topSetData" type="application/json">{{ top_set_series|to_json_safe|safe }}</script>
+<script id="volumeData" type="application/json">{{ weekly_volume_data|to_json_safe|safe }}</script>
+<script>
+  (function() {
+    const ts = JSON.parse(document.getElementById('topSetData').textContent || '[]');
+    const vd = JSON.parse(document.getElementById('volumeData').textContent || '[]');
+    const ink = getComputedStyle(document.documentElement).getPropertyValue('--tf-blue').trim() || '#203F9A';
+    const muted = '#8B847C';
+    const grid = 'rgba(74, 39, 16, 0.08)';
+
+    if (ts.length) {
+      new Chart(document.getElementById('topSetChart'), {
+        type: 'line',
+        data: {
+          labels: ts.map(p => p.date),
+          datasets: [{
+            label: 'Top set (kg)',
+            data: ts.map(p => p.weight),
+            borderColor: ink,
+            backgroundColor: 'rgba(32, 63, 154, 0.1)',
+            tension: 0.3,
+            fill: true,
+            pointRadius: 4,
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            x: { grid: { color: grid }, ticks: { color: muted } },
+            y: { grid: { color: grid }, ticks: { color: muted } }
+          }
+        }
+      });
+    }
+
+    if (vd.length) {
+      new Chart(document.getElementById('volumeChart'), {
+        type: 'bar',
+        data: {
+          labels: vd.map(p => p.week.slice(5)),
+          datasets: [{
+            label: 'Volume',
+            data: vd.map(p => p.volume),
+            backgroundColor: 'rgba(232, 71, 151, 0.7)',
+            borderRadius: 6,
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            x: { grid: { display: false }, ticks: { color: muted } },
+            y: { grid: { color: grid }, ticks: { color: muted } }
+          }
+        }
+      });
+    }
+  })();
+</script>
+{% endblock %}

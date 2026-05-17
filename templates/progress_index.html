@@ -1,0 +1,34 @@
+{% extends "_app_shell.html" %}
+
+{% block title %}Progress — TrainForge{% endblock %}
+{% block page_label %}Progress{% endblock %}
+
+{% block content %}
+<h1>Pick a client</h1>
+<p class="text-muted-warm mb-4">Choose someone to see their charts, PRs, and consistency heatmap.</p>
+
+<div class="row g-3">
+  {% for c in clients %}
+    <div class="col-md-6 col-xl-4">
+      <a class="card tf-card p-3 text-decoration-none text-ink h-100 d-block" href="{% url 'progress' client_id=c.id %}">
+        <div class="d-flex align-items-center gap-3">
+          <div class="tf-avatar" style="background: {{ c.avatar_color|default:'#94C2DA' }};">{{ c.initials }}</div>
+          <div class="flex-grow-1">
+            <div class="fw-medium">{{ c.full_name }}</div>
+            <div class="small text-muted-warm">{{ c.get_goal_display }} · {{ c.session_logs.count }} sessions</div>
+          </div>
+          <i class="bi bi-chevron-right text-muted-warm"></i>
+        </div>
+      </a>
+    </div>
+  {% empty %}
+    <div class="col-12">
+      <div class="card tf-card empty-state p-5">
+        <i class="bi bi-graph-up display-5 d-block mb-2 text-muted-warm"></i>
+        <p>No clients yet — add one and log some sessions to see progress.</p>
+        <a href="{% url 'client_create' %}" class="btn btn-primary">Add a client</a>
+      </div>
+    </div>
+  {% endfor %}
+</div>
+{% endblock %}
