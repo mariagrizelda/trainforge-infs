@@ -1,0 +1,101 @@
+{% extends "_app_shell.html" %}
+
+{% block title %}Exercises — TrainForge{% endblock %}
+{% block page_label %}Exercise library{% endblock %}
+
+{% block topbar_actions %}
+  <a href="{% url 'exercise_create' %}" class="btn btn-primary"><i class="bi bi-plus-lg me-1"></i>New exercise</a>
+{% endblock %}
+
+{% block content %}
+<div class="tf-reveal">
+  <div class="mb-3 d-flex justify-content-between align-items-end flex-wrap gap-2">
+    <div>
+      <h1>Your exercise library</h1>
+      <p class="text-muted-warm mb-0">Reusable exercises that show up in training plans and AI suggestions.</p>
+    </div>
+  </div>
+
+  <form method="get" class="mb-3">
+    <div class="row g-2">
+      <div class="col-md-5">
+        <input class="form-control" type="text" name="q" value="{{ q }}" placeholder="Search exercises..." />
+      </div>
+      <div class="col-md-3">
+        <select class="form-select" name="equipment" onchange="this.form.submit()">
+          <option value="">Any equipment</option>
+          {% for v, l in equipments %}
+            <option value="{{ v }}" {% if equipment == v %}selected{% endif %}>{{ l }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-3">
+        <select class="form-select" name="muscle" onchange="this.form.submit()">
+          <option value="">Any muscle</option>
+          {% for m in muscle_groups %}
+            <option value="{{ m.slug }}" {% if muscle == m.slug %}selected{% endif %}>{{ m.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-1"><button class="btn btn-outline-ink w-100">Filter</button></div>
+    </div>
+  </form>
+
+  <div class="row g-3">
+    {% for e in page %}
+      <div class="col-md-6 col-xl-4">
+        <div class="card tf-card p-3 h-100 d-flex flex-column">
+          <div class="d-flex justify-content-between align-items-start mb-2">
+            <h3 class="fs-5 mb-0 font-display">{{ e.name }}</h3>
+            <div class="dropdown">
+              <button class="btn btn-sm border-0 text-muted-warm" data-bs-toggle="dropdown">
+                <i class="bi bi-three-dots"></i>
+              </button>
+              <ul class="dropdown-menu dropdown-menu-end">
+                <li><a class="dropdown-item" href="{% url 'exercise_edit' e.id %}"><i class="bi bi-pencil me-2"></i>Edit</a></li>
+                <li>
+                  <form method="post" action="{% url 'exercise_archive' e.id %}" onsubmit="return confirm('Delete {{ e.name|escapejs }}? This can\'t be undone.');">{% csrf_token %}
+                    <button class="dropdown-item text-danger" type="submit">
+                      <i class="bi bi-trash me-2"></i>Delete
+                    </button>
+                  </form>
+                </li>
+              </ul>
+            </div>
+          </div>
+          <div class="d-flex flex-wrap gap-1 mb-2">
+            <span class="pill pill-blue">{{ e.get_equipment_display }}</span>
+            <span class="pill pill-sky">{{ e.get_difficulty_display }}</span>
+          </div>
+          {% if e.description %}<div class="small text-ink-soft mb-2">{{ e.description|truncatechars:120 }}</div>{% endif %}
+          <div class="d-flex flex-wrap gap-1 mb-2">
+            {% for mg in e.muscle_groups.all %}
+              <span class="pill" style="background: var(--tf-line-soft); color: var(--tf-ink-soft);">{{ mg.name }}</span>
+            {% endfor %}
+          </div>
+          <div class="mt-auto small text-muted-warm tf-mono">
+            Default: {{ e.default_sets }} × {{ e.default_reps }} · {{ e.default_rest_seconds }}s rest
+          </div>
+        </div>
+      </div>
+    {% empty %}
+      <div class="col-12">
+        <div class="card tf-card p-5 empty-state">
+          <i class="bi bi-grid-3x3-gap display-4 d-block mb-2 text-muted-warm"></i>
+          <h3 class="font-display">Your library is empty</h3>
+          <p class="text-muted-warm">Add a few core lifts and bodyweight moves to start.</p>
+          <a href="{% url 'exercise_create' %}" class="btn btn-primary"><i class="bi bi-plus-lg me-1"></i>Add exercise</a>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+
+  {% if page.has_other_pages %}
+    <nav class="mt-3"><ul class="pagination justify-content-center mb-0">
+      {% if page.has_previous %}<li class="page-item"><a class="page-link" href="?page={{ page.previous_page_number }}">←</a></li>{% endif %}
+      <li class="page-item disabled"><span class="page-link">{{ page.number }} / {{ page.paginator.num_pages }}</span></li>
+      {% if page.has_next %}<li class="page-item"><a class="page-link" href="?page={{ page.next_page_number }}">→</a></li>{% endif %}
+    </ul></nav>
+  {% endif %}
+</div>
+{% endblock %}
