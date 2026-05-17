@@ -1,0 +1,323 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}TrainForge. Coach more, paperwork less.{% endblock %}
+
+{% block body %}
+<div class="lp-page">
+  <div class="lp-shell">
+
+    <section class="lp-hero">
+      <nav class="lp-nav" aria-label="Primary">
+        <a href="{% url 'landing' %}" class="lp-brand">
+          <span class="lp-brand-dot"></span>
+          <span class="lp-brand-word">TrainForge</span>
+        </a>
+        <div class="lp-nav-links">
+          <a href="#features" class="lp-nav-link active">Home</a>
+          <a href="#inside" class="lp-nav-link">How it works</a>
+          <a href="#journey" class="lp-nav-link">Pricing</a>
+          <a href="#contact" class="lp-nav-link">Contact</a>
+        </div>
+        <div class="lp-nav-cta">
+          <a href="{% url 'login' %}" class="lp-btn-ghost">Log in</a>
+          <a href="{% url 'signup' %}" class="lp-btn-pill">Get started</a>
+        </div>
+      </nav>
+
+      <div class="lp-hero-grid">
+        <div>
+          <h1 class="lp-hero-title">
+            Coach more.<br/>
+            <strong>Paperwork less.</strong>
+          </h1>
+          <div class="lp-hero-actions">
+            <a href="{% url 'signup' %}" class="lp-cta-primary">Start coaching</a>
+            <a href="{% url 'login' %}" class="lp-cta-icon" aria-label="Sign in">
+              <i class="bi bi-arrow-up-right"></i>
+            </a>
+          </div>
+          <p class="lp-hero-blurb">
+            Run your client book, plans, sessions, and progress from one place
+            instead of a stack of spreadsheets and notes apps. Built for
+            independent personal trainers carrying 5 to 50 clients.
+          </p>
+          <p class="lp-hero-footnote">&copy; 2026 TrainForge</p>
+        </div>
+
+        <div class="lp-mock-stack">
+          
+          <div class="tf-next-card">
+            <div>
+              <div class="tf-next-label">Next up</div>
+              <div class="d-flex align-items-baseline gap-3">
+                <div class="tf-next-time">09:00</div>
+                <div>
+                  <div class="tf-next-name">Sarah Kawamoto</div>
+                  <div class="tf-next-meta">Day A, Push. 60 min. The Iron Practice.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card tf-card p-3 lp-day">
+            <div class="tf-eyebrow">Today</div>
+            <h2 class="fs-3 mb-2">Sessions</h2>
+            <div class="tf-day-track" aria-hidden="true">
+              <a class="tf-day-block next" style="left: 0%; width: calc(16.67% - 4px);">
+                <div class="tf-db-time">09:00 · 60m</div>
+                <div class="tf-db-name">Sarah K.</div>
+              </a>
+              <a class="tf-day-block" style="left: 41.67%; width: calc(16.67% - 4px);">
+                <div class="tf-db-time">11:30 · 60m</div>
+                <div class="tf-db-name">Marcus T.</div>
+              </a>
+              <a class="tf-day-block" style="left: 66.67%; width: calc(12.5% - 4px);">
+                <div class="tf-db-time">13:00 · 45m</div>
+                <div class="tf-db-name">Priya R.</div>
+              </a>
+            </div>
+            <div class="tf-day-axis lp-day-axis" aria-hidden="true">
+              <span>09</span><span>10</span><span>11</span>
+              <span>12</span><span>13</span><span>14</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="lp-stats" id="features">
+      <div class="lp-stat"><strong>Stops you forgetting</strong><span>Every plan, in one place</span></div>
+      <div class="lp-stat"><strong>Frees up your evenings</strong><span>No more spreadsheets</span></div>
+      <div class="lp-stat"><strong>Catches double bookings</strong><span>Before you do</span></div>
+      <div class="lp-stat"><strong>Shows real progress</strong><span>In charts you can share</span></div>
+    </div>
+
+    <section class="lp-feature-row">
+      <div class="lp-feature-image">
+        <img src="{% static 'img/coaching-kettlebell.jpg' %}" alt="Personal trainer coaching a client through a kettlebell movement" />
+        <div class="lp-feature-stat">
+          <i class="bi bi-graph-up text-blue"></i>
+          <div>
+            <div style="font-weight: 500;">+ 12 kg</div>
+            <div style="color: var(--tf-muted); font-size: 11px;">since week one</div>
+          </div>
+        </div>
+        <div class="lp-feature-chip">
+          <i class="bi bi-clipboard-check"></i> Plan on track
+        </div>
+      </div>
+
+      <div>
+        <h2 class="lp-feature-title">
+          Spend the session on the floor, not the laptop.
+        </h2>
+        <p class="lp-feature-blurb">
+          Every minute you spend reconciling notes between sessions is a minute
+          you are not coaching. TrainForge keeps every client detail, plan, and
+          session log within one click so you can show up, run the session, and
+          move on.
+        </p>
+        <div class="lp-bullet-grid">
+          <div class="lp-bullet">
+            <span class="lp-bullet-ico"><i class="bi bi-people"></i></span>
+            <div>
+              <h4>Never lose context on a client</h4>
+              <p>Goals, equipment, injuries, and the last thing you spoke about. Pulled up by name in two seconds.</p>
+            </div>
+          </div>
+          <div class="lp-bullet">
+            <span class="lp-bullet-ico"><i class="bi bi-stars"></i></span>
+            <div>
+              <h4>Skip the blank page</h4>
+              <p>Get a starter plan tailored to the client's goal and gear in seconds. You edit, you approve, you save.</p>
+            </div>
+          </div>
+          <div class="lp-bullet">
+            <span class="lp-bullet-ico"><i class="bi bi-calendar3"></i></span>
+            <div>
+              <h4>Stop double-booking yourself</h4>
+              <p>A weekly grid that warns you before a session overlaps another, with one tap reschedule.</p>
+            </div>
+          </div>
+          <div class="lp-bullet">
+            <span class="lp-bullet-ico"><i class="bi bi-graph-up"></i></span>
+            <div>
+              <h4>Prove the work is working</h4>
+              <p>Top set, weekly volume, and consistency turned into clear charts you can show clients during a review.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="lp-darkcard" id="inside">
+      <div class="lp-darkcard-head">
+        <div class="lp-darkcard-title">
+          <small>Inside the app</small>
+          The screens<br/>
+          you will actually <strong>live in.</strong>
+        </div>
+        <div class="lp-darkcard-side">
+          <div class="num">/ 02</div>
+          <div class="label">Every component below is the real thing from the app, not a mockup.</div>
+        </div>
+      </div>
+
+      <div class="lp-darkcard-mosaic">
+
+        <div class="card tf-card p-3" style="overflow: hidden;">
+          <div class="tf-eyebrow">Clients</div>
+          <h3 class="fs-5 mb-3">One list, one click in.</h3>
+          <div class="tf-list" role="list">
+            <a class="tf-row" role="listitem" style="grid-template-columns: 36px 1fr auto auto;">
+              <div class="tf-avatar" style="background: var(--tf-blue);">SK</div>
+              <div>
+                <div class="tf-row-name">Sarah Kawamoto</div>
+                <div class="tf-row-sub">Hypertrophy. 4 days a week.</div>
+              </div>
+              <div class="text-muted-warm small tf-mono">W3/4</div>
+              <span class="pill pill-blue">Active</span>
+            </a>
+            <a class="tf-row" role="listitem" style="grid-template-columns: 36px 1fr auto auto;">
+              <div class="tf-avatar" style="background: var(--tf-pink);">MT</div>
+              <div>
+                <div class="tf-row-name">Marcus Tanaka</div>
+                <div class="tf-row-sub">Strength. 3 days a week.</div>
+              </div>
+              <div class="text-muted-warm small tf-mono">W2/4</div>
+              <span class="pill pill-blue">Active</span>
+            </a>
+            <a class="tf-row" role="listitem" style="grid-template-columns: 36px 1fr auto auto;">
+              <div class="tf-avatar" style="background: var(--tf-sky);">PR</div>
+              <div>
+                <div class="tf-row-name">Priya Ramachandran</div>
+                <div class="tf-row-sub">Fat loss. 3 days a week.</div>
+              </div>
+              <div class="text-muted-warm small tf-mono">W1/6</div>
+              <span class="pill pill-sky">New</span>
+            </a>
+          </div>
+        </div>
+
+        <div class="card tf-card p-3">
+          <div class="tf-eyebrow">Progress</div>
+          <h3 class="fs-5 mb-3">See the work, not the spreadsheet.</h3>
+
+          <div class="d-flex justify-content-between align-items-baseline mb-2">
+            <div class="small text-muted-warm">Top set, last 8 sessions</div>
+            <div class="tf-mono small" style="color: var(--tf-blue);">+18%</div>
+          </div>
+          
+          <svg viewBox="0 0 220 60" width="100%" height="60" preserveAspectRatio="none" aria-hidden="true" style="display:block;">
+            <path d="M0,46 L28,40 L56,42 L84,30 L112,28 L140,22 L168,18 L196,12 L220,8"
+                  fill="none" stroke="var(--tf-blue)" stroke-width="2.5" stroke-linecap="round" />
+            <path d="M0,46 L28,40 L56,42 L84,30 L112,28 L140,22 L168,18 L196,12 L220,8 L220,60 L0,60 Z"
+                  fill="rgba(31, 58, 138, 0.10)" />
+          </svg>
+
+          <div class="d-flex justify-content-between align-items-baseline mt-3 mb-2">
+            <div class="small text-muted-warm">Consistency, last 90 days</div>
+            <div class="tf-mono small">28/90</div>
+          </div>
+          <div class="d-flex flex-wrap" style="gap: 2px;" aria-hidden="true">
+            {% for i in "x"|ljust:"90" %}
+              {% if forloop.counter|divisibleby:3 or forloop.counter|divisibleby:7 %}
+                <span class="heatmap-cell heatmap-3" style="width:9px;height:9px;"></span>
+              {% else %}
+                <span class="heatmap-cell heatmap-0" style="width:9px;height:9px;"></span>
+              {% endif %}
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="lp-tagline-row">
+      <div class="lp-tagline-blurb">
+        TrainForge bends to fit how you already coach. You bring your exercise
+        library and weekly rhythm, the app handles the scheduling, plan tracking,
+        and progress reporting around it.
+        <br/>
+        <a href="{% url 'signup' %}" class="lp-cta">See more</a>
+      </div>
+      <div class="lp-tagline">
+        Strengthen your<br/>
+        practice. <u>Reclaim</u><br/>
+        <u>your evenings.</u>
+      </div>
+    </section>
+
+    <section class="lp-journey" id="journey">
+      <div>
+        <h3>Built around how trainers actually work</h3>
+        <p class="small">A focused tool for independent coaches who would rather train people than tame a spreadsheet.</p>
+      </div>
+      <div>
+        <div class="big">5 to 50</div>
+        <div class="small">Clients per trainer it is designed for</div>
+      </div>
+      <div>
+        <div class="big">2 mins</div>
+        <div class="small">To turn a client profile into a draft plan</div>
+      </div>
+    </section>
+
+    <section class="lp-team">
+      <div class="lp-team-card">
+        <span class="tag">Built with coaches</span>
+        <h3>The kind of software you wish was already running in your studio.</h3>
+        <a class="cta" href="{% url 'signup' %}">Try it with your first client</a>
+      </div>
+      <div class="lp-team-photo">
+        <img src="{% static 'img/hero-gym.jpg' %}" alt="Personal trainer assisting a client with a dumbbell press" />
+        <div class="overlay">
+          <div style="font-weight: 500; font-size: 13px;">Sarah K.</div>
+          <div style="color: var(--tf-muted); font-size: 11px;">Strength block. Week 3 of 4.</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="lp-ctacard" id="contact">
+      <div class="lp-ctacard-row">
+        <h2>Get your evenings back.<br/>Sign up <strong>free</strong>.</h2>
+        <a href="{% url 'signup' %}" class="lp-cta-primary">Get started now</a>
+      </div>
+
+      <div class="lp-ctacard-footer">
+        <div>
+          <a href="{% url 'landing' %}" class="lp-brand">
+            <span class="lp-brand-dot"></span>
+            <span class="lp-brand-word">TrainForge</span>
+          </a>
+          <p>A student project for INFS7202 at UQ. Designed around how independent personal trainers actually run their week.</p>
+        </div>
+        <div>
+          <h5>Product</h5>
+          <ul>
+            <li><a href="#features">Features</a></li>
+            <li><a href="#inside">Inside the app</a></li>
+            <li><a href="{% url 'signup' %}">Start free</a></li>
+          </ul>
+        </div>
+        <div>
+          <h5>Company</h5>
+          <ul>
+            <li><a href="#">About</a></li>
+            <li><a href="#">Privacy</a></li>
+            <li><a href="#">Terms</a></li>
+          </ul>
+        </div>
+        <div>
+          <h5>Account</h5>
+          <ul>
+            <li><a href="{% url 'signup' %}">Create an account</a></li>
+            <li><a href="{% url 'login' %}">Sign in</a></li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+  </div>
+</div>
+{% endblock %}
