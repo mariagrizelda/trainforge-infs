@@ -1,0 +1,71 @@
+{% extends "_app_shell.html" %}
+{% load tf_extras %}
+
+{% block title %}Calendar — TrainForge{% endblock %}
+{% block page_label %}Calendar{% endblock %}
+
+{% block topbar_actions %}
+  <a href="{% url 'calendar' %}?week={{ prev_week }}" class="btn btn-outline-ink btn-sm"><i class="bi bi-chevron-left"></i></a>
+  <a href="{% url 'calendar' %}" class="btn btn-outline-ink btn-sm">Today</a>
+  <a href="{% url 'calendar' %}?week={{ next_week }}" class="btn btn-outline-ink btn-sm"><i class="bi bi-chevron-right"></i></a>
+  <a href="{% url 'appointment_create' %}" class="btn btn-primary"><i class="bi bi-plus-lg me-1"></i>New appointment</a>
+{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-end mb-3 flex-wrap gap-2">
+  <div>
+    <h1>Week of {{ week_start|date:"j F Y" }}</h1>
+    <p class="text-muted-warm mb-0">{{ appts_count }} appointment{{ appts_count|pluralize }} this week.</p>
+  </div>
+</div>
+
+<div class="tf-cal tf-reveal">
+  <table class="tf-cal-table" role="grid" aria-label="Weekly appointments grid">
+    <thead>
+      <tr>
+        <th scope="col" style="width:70px;"></th>
+        {% for d in days %}
+          <th scope="col" class="{% if d == today %}today{% endif %}">
+            <div>{{ d|date:"D" }}</div>
+            <div class="font-display fs-5 mt-1">{{ d|date:"j M" }}</div>
+            {% if d == today %}<div class="small">Today</div>{% endif %}
+          </th>
+        {% endfor %}
+      </tr>
+    </thead>
+    <tbody>
+      {% for h in hours %}
+        <tr>
+          <td class="hour-label" scope="row">{{ h }}:00</td>
+          {% for d in days %}
+            {% with slot=by_slot|get_item:forloop.counter0|get_item:h %}
+            <td class="tf-cal-cell {% if d == today %}today-col{% endif %} {% if slot %}has-appt{% endif %}">
+              {% if slot %}
+                {% for a in slot %}
+                  <a href="{% url 'appointment_edit' a.id %}"
+                     class="tf-appt"
+                     style="background: {{ a.client.avatar_color|default:'#203F9A' }};">
+                    <div class="tf-appt-time">{{ a.start_at|time:"H:i" }} · {{ a.duration_minutes }}m</div>
+                    <div class="tf-appt-name">{{ a.client.full_name }}</div>
+                  </a>
+                {% endfor %}
+              {% else %}
+                <a class="tf-cal-empty"
+                   href="{% url 'appointment_create' %}?start={{ d|date:'Y-m-d' }}T{{ h|stringformat:'02d' }}:00"
+                   aria-label="Add appointment at {{ d|date:'j M' }} {{ h }}:00">
+                  <span class="tf-cal-empty-plus" aria-hidden="true">+</span>
+                </a>
+              {% endif %}
+            </td>
+            {% endwith %}
+          {% endfor %}
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<div class="small text-muted-warm mt-3">
+  Click an empty cell to create a new appointment. Click an existing one to edit.
+</div>
+{% endblock %}

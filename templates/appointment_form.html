@@ -1,0 +1,117 @@
+{% extends "_app_shell.html" %}
+
+{% block title %}{% if appointment %}Edit appointment{% else %}New appointment{% endif %} — TrainForge{% endblock %}
+{% block page_label %}{% if appointment %}Edit appointment{% else %}New appointment{% endif %}{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-lg-7">
+    <div class="card tf-card p-4 p-lg-5 tf-reveal">
+      <h1>{% if appointment %}Update appointment{% else %}Schedule a session{% endif %}</h1>
+
+      {% if conflicts %}
+        <div class="alert" role="alert" style="background: #fff; color: var(--tf-ink); border: 1px solid var(--tf-line); border-left: 3px solid var(--tf-pink); border-radius: 4px;">
+          <strong><i class="bi bi-exclamation-triangle me-1"></i>Time conflict</strong>
+          <p class="mb-2 small text-ink-soft">This overlaps with:</p>
+          <ul class="mb-2 small">
+            {% for c in conflicts %}<li>{{ c.client.full_name }} at {{ c.start_at|time:"H:i" }} ({{ c.duration_minutes }} min)</li>{% endfor %}
+          </ul>
+          <div class="small text-muted-warm">Submit again with "Schedule anyway" to keep it as-is.</div>
+        </div>
+      {% endif %}
+
+      {% if appointment %}
+        <form id="delete-appointment-form" method="post"
+              action="{% url 'appointment_delete' appointment.id %}"
+              onsubmit="return confirm('Delete this appointment? This can\'t be undone.');">
+          {% csrf_token %}
+        </form>
+      {% endif %}
+
+      <form method="post" novalidate>
+        {% csrf_token %}
+        {% if form.non_field_errors %}<div class="alert alert-danger small">{{ form.non_field_errors }}</div>{% endif %}
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label class="form-label" for="id_client">Client</label>{{ form.client }}
+          </div>
+          <div class="col-md-6">
+            <label class="form-label" for="id_plan_day">Plan day (optional)</label>{{ form.plan_day }}
+          </div>
+          <div class="col-md-7">
+            <label class="form-label" for="id_start_at">Start</label>{{ form.start_at }}
+          </div>
+          <div class="col-md-5">
+            <label class="form-label" for="id_duration_minutes">Duration (minutes)</label>{{ form.duration_minutes }}
+          </div>
+          <div class="col-md-6">
+            <label class="form-label" for="id_status">Status</label>{{ form.status }}
+          </div>
+          <div class="col-md-6">
+            <label class="form-label" for="id_location">Location</label>{{ form.location }}
+          </div>
+          <div class="col-12">
+            <label class="form-label" for="id_notes">Notes</label>{{ form.notes }}
+          </div>
+        </div>
+
+        <div class="d-flex justify-content-between gap-2 mt-4 flex-wrap">
+          <div>
+            {% if appointment %}
+              
+              <button type="submit" form="delete-appointment-form"
+                      class="btn btn-outline-ink text-danger">
+                <i class="bi bi-trash me-1"></i>Delete
+              </button>
+            {% endif %}
+          </div>
+          <div class="d-flex gap-2">
+            <a href="{% url 'calendar' %}" class="btn btn-outline-ink">Cancel</a>
+            {% if conflicts %}
+              <button class="btn btn-primary" name="force" value="1">Schedule anyway</button>
+            {% else %}
+              <button class="btn btn-primary">{% if appointment %}Save{% else %}Create{% endif %}</button>
+            {% endif %}
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  // Filter plan-day options to only the currently-selected client.
+  // Each <option> on the plan-day select carries a data-client attribute
+  // (set server-side by _PlanDayClientWidget) which we match against the
+  // client select's value.
+  (function () {
+    var clientSelect = document.getElementById('id_client');
+    var planDaySelect = document.getElementById('id_plan_day');
+    if (!clientSelect || !planDaySelect) return;
+
+    function applyFilter() {
+      var clientId = clientSelect.value;
+      var anyVisible = false;
+      Array.from(planDaySelect.options).forEach(function (opt) {
+        if (!opt.value) {
+          opt.hidden = false;       // always keep "----" placeholder
+          return;
+        }
+        var visible = !clientId || opt.dataset.client === clientId;
+        opt.hidden = !visible;
+        if (visible) anyVisible = true;
+      });
+      // If the currently-selected plan day no longer matches the chosen
+      // client, reset it back to the blank placeholder.
+      var current = planDaySelect.options[planDaySelect.selectedIndex];
+      if (current && current.hidden) planDaySelect.value = '';
+      planDaySelect.disabled = !clientId || !anyVisible;
+    }
+
+    clientSelect.addEventListener('change', applyFilter);
+    applyFilter();
+  })();
+</script>
+{% endblock %}
