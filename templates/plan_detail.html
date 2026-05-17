@@ -1,0 +1,158 @@
+{% extends "_app_shell.html" %}
+
+{% block title %}{{ plan.name }} — {{ plan.client.full_name }}{% endblock %}
+{% block page_label %}{{ plan.name }}{% endblock %}
+
+{% block topbar_actions %}
+  <a href="{% url 'plan_edit' plan.id %}" class="btn btn-outline-ink"><i class="bi bi-pencil me-1"></i>Edit details</a>
+  <form method="post" action="{% url 'plan_archive' plan.id %}" class="d-inline" onsubmit="return confirm('Delete this plan? This can\'t be undone.');">{% csrf_token %}
+    <button class="btn btn-outline-ink text-danger"><i class="bi bi-trash me-1"></i>Delete plan</button>
+  </form>
+{% endblock %}
+
+{% block content %}
+<div class="row g-4">
+  <div class="col-lg-8">
+    <div class="card tf-card p-4 mb-3">
+      <div class="d-flex justify-content-between align-items-end mb-2">
+        <div>
+          <div class="tf-mono text-uppercase small text-muted-warm mb-1" style="font-size:10px;">For</div>
+          <a class="font-display fs-3 text-decoration-none text-ink" href="{% url 'client_detail' plan.client.id %}">
+            {{ plan.client.full_name }}
+          </a>
+        </div>
+        <div class="text-end">
+          <div class="tf-mono small text-muted-warm">Week {{ plan.current_week }} / {{ plan.weeks }}</div>
+          <div class="tf-progress mt-1" style="width: 140px;"><div class="tf-progress-fill" style="width: {{ plan.progress_pct }}%;"></div></div>
+        </div>
+      </div>
+      {% if plan.description %}<p class="text-ink-soft mb-0">{{ plan.description|linebreaksbr }}</p>{% endif %}
+    </div>
+
+    {% for day in plan.days.all %}
+      <div class="card tf-card p-4 mb-3">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <h3 class="font-display fs-4 mb-0">{{ day.label }}</h3>
+          <form method="post" action="{% url 'plan_day_delete' day.id %}" onsubmit="return confirm('Remove this day?');">
+            {% csrf_token %}
+            <button class="btn btn-sm btn-outline-ink text-danger border-0"><i class="bi bi-trash"></i></button>
+          </form>
+        </div>
+
+        <ol class="list-group list-group-flush mb-3" style="--bs-list-group-bg: transparent;">
+          {% for pe in day.exercises.all %}
+            <li class="list-group-item d-flex justify-content-between align-items-center px-0" style="background: transparent;">
+              <div>
+                <div class="fw-medium">{{ pe.exercise.name }}</div>
+                <div class="small text-muted-warm tf-mono">
+                  {{ pe.sets }} × {{ pe.reps }} · {{ pe.rest_seconds }}s rest
+                  {% if pe.coaching_notes %}· {{ pe.coaching_notes }}{% endif %}
+                </div>
+              </div>
+              <form method="post" action="{% url 'plan_exercise_delete' pe.id %}" onsubmit="return confirm('Remove?');">
+                {% csrf_token %}
+                <button class="btn btn-sm border-0 text-muted-warm"><i class="bi bi-x-lg"></i></button>
+              </form>
+            </li>
+          {% empty %}
+            <li class="list-group-item text-muted-warm small px-0" style="background: transparent;">No exercises yet.</li>
+          {% endfor %}
+        </ol>
+
+        <form method="post" action="{% url 'plan_exercise_create' day_id=day.id %}" class="row g-2 plan-exercise-form">
+          {% csrf_token %}
+          <div class="col-md-4">
+            <select class="form-select" name="exercise" required>
+              <option value="">Choose an exercise...</option>
+              {% for e in exercises %}
+                <option value="{{ e.id }}"
+                        data-sets="{{ e.default_sets }}"
+                        data-reps="{{ e.default_reps }}"
+                        data-rest="{{ e.default_rest_seconds }}">{{ e.name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="col-md-2">
+            <input class="form-control" type="number" name="sets" placeholder="Sets" min="1" required data-field="sets" />
+          </div>
+          <div class="col-md-2">
+            <input class="form-control" type="text" name="reps" placeholder="Reps" required data-field="reps" />
+          </div>
+          <div class="col-md-2">
+            <input class="form-control" type="number" name="rest_seconds" placeholder="Rest (s)" min="0" data-field="rest" />
+          </div>
+          <div class="col-md-2">
+            <button class="btn btn-primary w-100"><i class="bi bi-plus-lg"></i> Add</button>
+          </div>
+          <div class="col-12">
+            <input class="form-control" type="text" name="coaching_notes" placeholder="Coaching note (optional)" />
+          </div>
+        </form>
+      </div>
+    {% empty %}
+      <div class="card tf-card empty-state p-5">
+        <i class="bi bi-clipboard-x display-5 d-block mb-2 text-muted-warm"></i>
+        <p>No days yet.</p>
+      </div>
+    {% endfor %}
+
+    <form method="post" action="{% url 'plan_day_create' pk=plan.id %}" class="d-flex gap-2">
+      {% csrf_token %}
+      <input class="form-control" type="text" name="label" placeholder="Day name (e.g. Day B — Pull)" />
+      <button class="btn btn-outline-ink"><i class="bi bi-plus-lg me-1"></i>Add a day</button>
+    </form>
+  </div>
+
+  <div class="col-lg-4">
+    <div class="card tf-card p-4">
+      <div class="font-display fs-5 mb-2">Quick actions</div>
+      <a href="{% url 'session_log_create' client_id=plan.client.id %}?plan_day_first=1" class="btn btn-primary w-100 mb-2">
+        <i class="bi bi-journal-plus me-2"></i>Log a session
+      </a>
+      <a href="{% url 'appointment_create' %}?client={{ plan.client.id }}" class="btn btn-outline-ink w-100 mb-2">
+        <i class="bi bi-calendar-plus me-2"></i>Schedule a session
+      </a>
+      <a href="{% url 'progress' client_id=plan.client.id %}" class="btn btn-outline-ink w-100">
+        <i class="bi bi-graph-up me-2"></i>View progress
+      </a>
+    </div>
+
+    {% if plan.generated_by_ai %}
+      <div class="card tf-card p-4 mt-3" style="background: var(--tf-bg-cream); border-left: 3px solid var(--tf-blue);">
+        <div class="d-flex align-items-center gap-2 mb-1">
+          <i class="bi bi-stars text-blue"></i>
+          <strong>AI-generated plan</strong>
+        </div>
+        <div class="small text-ink-soft">Always review the structure with your client. The AI is a starting point, not a substitute for your judgement.</div>
+      </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  // When the trainer picks an exercise, prefill sets / reps / rest from its defaults.
+  // Both the actual value AND the placeholder get the default so it's also visible
+  // before the user clears the field.
+  document.querySelectorAll('.plan-exercise-form select[name="exercise"]').forEach(function (sel) {
+    sel.addEventListener('change', function () {
+      var form = sel.closest('form');
+      var opt = sel.options[sel.selectedIndex];
+      if (!opt || !opt.value) return;
+      var defaults = {
+        sets: opt.dataset.sets || '',
+        reps: opt.dataset.reps || '',
+        rest: opt.dataset.rest || ''
+      };
+      form.querySelectorAll('input[data-field]').forEach(function (input) {
+        var key = input.dataset.field;
+        var val = defaults[key];
+        if (!val) return;
+        input.value = val;
+        input.placeholder = val;
+      });
+    });
+  });
+</script>
+{% endblock %}
