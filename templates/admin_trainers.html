@@ -1,0 +1,93 @@
+{% extends "_admin_shell.html" %}
+
+{% block title %}Trainers — Admin{% endblock %}
+{% block page_label %}Trainers{% endblock %}
+
+{% block content %}
+<div class="tf-reveal">
+
+  <section class="tf-section">
+    <div class="tf-eyebrow">Manage</div>
+    <h1>Trainers</h1>
+    <p class="text-ink-soft mb-0">Assign each trainer to a subscription plan, or cancel their subscription.</p>
+  </section>
+
+  <section class="tf-section">
+    <form method="get" class="mb-3">
+      <div class="input-group" style="max-width: 380px;">
+        <span class="input-group-text bg-white"><i class="bi bi-search text-muted-warm"></i></span>
+        <input type="text" name="q" value="{{ q }}" class="form-control" placeholder="Search by name or email…" aria-label="Search trainers" />
+      </div>
+    </form>
+
+    <div class="tf-list" role="list">
+      <div class="tf-list-head admin-trainers-head" role="presentation">
+        <div></div>
+        <div>Trainer</div>
+        <div>Joined</div>
+        <div>Clients</div>
+        <div>Plan</div>
+        <div></div>
+      </div>
+
+      {% for t in page %}
+        <div class="tf-row admin-trainers-row" role="listitem">
+          <div class="tf-avatar tf-avatar-sm" style="background: {{ t.avatar_color|default:'#1F3A8A' }};">{{ t.initials }}</div>
+          <div class="tf-row-cell">
+            <div class="tf-row-name">{{ t.full_name|default:t.email }}</div>
+            <div class="tf-row-sub">{{ t.email }}</div>
+          </div>
+          <div class="tf-row-cell muted">{{ t.date_joined|date:"j M Y" }}</div>
+          <div class="tf-row-cell">{{ t.client_count }}</div>
+          <div class="tf-row-cell">
+            {% if t.subscription %}
+              {% if t.subscription.is_archived %}
+                <span class="pill pill-pink">{{ t.subscription.plan.name }} (archived)</span>
+              {% else %}
+                <span class="pill pill-blue">{{ t.subscription.plan.name }}</span>
+              {% endif %}
+            {% else %}
+              <span class="pill pill-sky">No plan</span>
+            {% endif %}
+          </div>
+          <div class="d-flex gap-1 justify-content-end align-items-center" style="min-width: 0;">
+            <form method="post" action="{% url 'admin_trainer_assign' t.id %}" class="d-flex gap-1 align-items-center" style="min-width: 0;">
+              {% csrf_token %}
+              <select name="plan" class="form-select form-select-sm" style="width: 150px; padding: 5px 8px; font-size: 13px;">
+                {% for p in plans %}
+                  <option value="{{ p.id }}"
+                    {% if t.subscription and t.subscription.plan_id == p.id %}selected{% endif %}>
+                    {{ p.name }}
+                  </option>
+                {% endfor %}
+              </select>
+              <button class="btn btn-outline-ink btn-sm">Assign</button>
+            </form>
+            {% if t.subscription and not t.subscription.is_archived %}
+              <form method="post" action="{% url 'admin_trainer_cancel' t.id %}" class="d-inline" onsubmit="return confirm('Archive this trainer\'s subscription? The trainer keeps their account.');">
+                {% csrf_token %}
+                <button class="btn btn-outline-ink btn-sm" title="Archive subscription" aria-label="Archive subscription"><i class="bi bi-archive"></i></button>
+              </form>
+            {% endif %}
+          </div>
+        </div>
+      {% empty %}
+        <div class="empty-state">
+          <p class="mb-0">No trainers match.</p>
+        </div>
+      {% endfor %}
+    </div>
+
+    {% if page.has_other_pages %}
+      <nav class="mt-3" aria-label="Pagination">
+        <ul class="pagination pagination-sm justify-content-center mb-0">
+          {% if page.has_previous %}<li class="page-item"><a class="page-link" href="?page={{ page.previous_page_number }}{% if q %}&q={{ q }}{% endif %}">←</a></li>{% endif %}
+          <li class="page-item disabled"><span class="page-link">{{ page.number }} / {{ page.paginator.num_pages }}</span></li>
+          {% if page.has_next %}<li class="page-item"><a class="page-link" href="?page={{ page.next_page_number }}{% if q %}&q={{ q }}{% endif %}">→</a></li>{% endif %}
+        </ul>
+      </nav>
+    {% endif %}
+  </section>
+
+</div>
+{% endblock %}

@@ -1,0 +1,127 @@
+{% extends "_admin_shell.html" %}
+
+{% block title %}Admin overview — TrainForge{% endblock %}
+{% block page_label %}Overview{% endblock %}
+
+{% block content %}
+<div class="tf-reveal">
+
+  <section class="tf-section">
+    <div class="tf-eyebrow">Admin console</div>
+    <h1>Subscriptions</h1>
+    <p class="text-ink-soft mb-0" style="max-width: 56ch;">
+      Manage subscription tiers and assign trainers to them. Archive replaces delete
+      for plans so historical billing stays intact.
+    </p>
+  </section>
+
+  <section class="tf-section">
+    <div class="tf-stats">
+      <div class="tf-stat">
+        <div class="tf-stat-label">Trainers</div>
+        <div class="tf-stat-value">{{ total_trainers }}</div>
+        <div class="tf-stat-meta">{{ total_clients }} client records</div>
+      </div>
+      <div class="tf-stat">
+        <div class="tf-stat-label">Active subs</div>
+        <div class="tf-stat-value">{{ active_subs }}</div>
+        <div class="tf-stat-meta">across all plans</div>
+      </div>
+      <div class="tf-stat">
+        <div class="tf-stat-label">Plans</div>
+        <div class="tf-stat-value">{{ active_plans }}<span class="text-muted-warm" style="font-size:16px;">/{{ archived_plans|add:active_plans }}</span></div>
+        <div class="tf-stat-meta">{{ archived_plans }} archived</div>
+      </div>
+      <div class="tf-stat">
+        <div class="tf-stat-label">Monthly revenue</div>
+        <div class="tf-stat-value">A${{ revenue|floatformat:0 }}</div>
+        <div class="tf-stat-meta">recurring</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="tf-section">
+    <div class="row g-5">
+
+      <div class="col-lg-7">
+        <div class="tf-section-head">
+          <div>
+            <div class="tf-eyebrow">Plans</div>
+            <h2 class="fs-3 mb-0">Subscription tiers</h2>
+          </div>
+          <a href="{% url 'admin_plans' %}">Manage all →</a>
+        </div>
+
+        <div class="tf-list" role="list">
+          <div class="tf-list-head admin-list-head" role="presentation">
+            <div>Name</div>
+            <div>Price</div>
+            <div>Max clients</div>
+            <div>Subscribers</div>
+            <div>Status</div>
+          </div>
+          {% for p in plans %}
+            <a class="tf-row admin-list-row" role="listitem" href="{% url 'admin_plan_edit' p.id %}">
+              <div>
+                <div class="tf-row-name">{{ p.name }}</div>
+                <div class="tf-row-sub">{{ p.slug }}</div>
+              </div>
+              <div>A${{ p.monthly_price_aud|floatformat:0 }}</div>
+              <div>{{ p.max_clients }}</div>
+              <div>{{ p.subscriber_count }}</div>
+              <div>
+                {% if p.is_archived %}
+                  <span class="pill pill-pink">Archived</span>
+                {% else %}
+                  <span class="pill pill-blue">Active</span>
+                {% endif %}
+              </div>
+            </a>
+          {% empty %}
+            <div class="empty-state">
+              <p class="mb-2">No plans yet.</p>
+              <a href="{% url 'admin_plan_create' %}" class="btn btn-primary">Create one</a>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+
+      <div class="col-lg-5">
+        <div class="tf-section-head">
+          <div>
+            <div class="tf-eyebrow">Recent</div>
+            <h2 class="fs-3 mb-0">New trainers</h2>
+          </div>
+          <a href="{% url 'admin_trainers' %}">All trainers →</a>
+        </div>
+
+        {% if recent_trainers %}
+          <div>
+            {% for t in recent_trainers %}
+              <div class="tf-feed-item">
+                <div class="tf-avatar tf-avatar-sm" style="background: var(--tf-blue);">{{ t.initials }}</div>
+                <div class="flex-grow-1">
+                  <div class="d-flex justify-content-between align-items-baseline gap-2">
+                    <div class="fw-medium">{{ t.full_name|default:t.email }}</div>
+                    <div class="small text-muted-warm">{{ t.date_joined|date:"j M" }}</div>
+                  </div>
+                  <div class="small text-ink-soft d-flex justify-content-between">
+                    <span>{{ t.email }}</span>
+                    <span class="text-muted-warm">
+                      {% if t.subscription %}{{ t.subscription.plan.name }}{% else %}—{% endif %}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <div class="text-muted-warm small">No trainers yet.</div>
+        {% endif %}
+      </div>
+
+    </div>
+  </section>
+
+</div>
+{% endblock %}

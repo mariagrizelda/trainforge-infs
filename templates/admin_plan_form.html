@@ -1,0 +1,78 @@
+{% extends "_admin_shell.html" %}
+
+{% block title %}{% if plan %}Edit {{ plan.name }}{% else %}New plan{% endif %} — Admin{% endblock %}
+{% block page_label %}{% if plan %}Edit plan{% else %}New plan{% endif %}{% endblock %}
+
+{% block content %}
+<div class="row g-4">
+  <div class="col-lg-7">
+    <div class="card tf-card p-4 p-lg-5 tf-reveal">
+      <h1>{% if plan %}Edit '{{ plan.name }}'{% else %}Create a subscription plan{% endif %}</h1>
+
+      {% if plan %}
+        <form id="archive-plan-form" method="post" action="{% url 'admin_plan_archive' plan.id %}">
+          {% csrf_token %}
+        </form>
+      {% endif %}
+
+      <form method="post" novalidate>
+        {% csrf_token %}
+        {% if form.non_field_errors %}<div class="alert alert-danger small">{{ form.non_field_errors }}</div>{% endif %}
+        <div class="row g-3">
+          <div class="col-12">
+            <label class="form-label" for="id_name">Name</label>{{ form.name }}
+            {% for e in form.name.errors %}<div class="text-danger small mt-1">{{ e }}</div>{% endfor %}
+          </div>
+          <div class="col-md-4">
+            <label class="form-label" for="id_monthly_price_aud">Monthly price (AUD)</label>{{ form.monthly_price_aud }}
+          </div>
+          <div class="col-md-4">
+            <label class="form-label" for="id_max_clients">Max clients</label>{{ form.max_clients }}
+          </div>
+          <div class="col-md-4">
+            <label class="form-label" for="id_ai_plans_per_month">AI plans per month</label>{{ form.ai_plans_per_month }}
+          </div>
+          <div class="col-12">
+            <label class="form-label" for="id_description">Description</label>{{ form.description }}
+          </div>
+        </div>
+
+        <div class="d-flex justify-content-between gap-2 mt-4">
+          <div>
+            {% if plan %}
+              <button type="submit" form="archive-plan-form"
+                      class="btn btn-outline-ink {% if not plan.is_archived %}text-danger{% endif %}">
+                {% if plan.is_archived %}<i class="bi bi-arrow-counterclockwise me-1"></i>Restore{% else %}<i class="bi bi-archive me-1"></i>Archive{% endif %}
+              </button>
+            {% endif %}
+          </div>
+          <div>
+            <a href="{% url 'admin_plans' %}" class="btn btn-outline-ink">Cancel</a>
+            <button class="btn btn-primary">{% if plan %}Save{% else %}Create plan{% endif %}</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  {% if plan and subscribers %}
+    <div class="col-lg-5">
+      <div class="card tf-card p-4">
+        <div class="tf-mono text-uppercase small text-muted-warm" style="font-size:10px;">On this plan</div>
+        <h2 class="font-display fs-3 mb-3">{{ subscribers|length }} trainer{{ subscribers|length|pluralize }}</h2>
+        <ul class="list-unstyled mb-0">
+          {% for s in subscribers %}
+            <li class="d-flex justify-content-between border-bottom py-2 small">
+              <div>
+                <div class="fw-medium">{{ s.trainer.full_name|default:s.trainer.email }}</div>
+                <div class="text-muted-warm">{{ s.trainer.email }}</div>
+              </div>
+              <div class="tf-mono text-muted-warm">since {{ s.started_at|date:"j M Y" }}</div>
+            </li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}
