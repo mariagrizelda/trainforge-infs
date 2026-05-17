@@ -1,0 +1,64 @@
+{% extends "_app_shell.html" %}
+
+{% block title %}AI plan generator — TrainForge{% endblock %}
+{% block page_label %}AI plan generator{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-lg-8">
+    <div class="card tf-card p-4 p-lg-5 tf-reveal">
+      <div class="d-flex align-items-center gap-2 mb-2">
+        <i class="bi bi-stars text-pink fs-3"></i>
+        <h1>Make a plan with AI</h1>
+      </div>
+      <p class="text-ink-soft">
+        Generate a starting draft from a client profile in seconds. Every exercise is
+        constrained to your library, every generation is logged, and you always review the
+        plan before it saves to the database.
+      </p>
+
+      <form id="genForm" hx-post="{% url 'ai_plan_generate' %}"
+            hx-target="#ai-result"
+            hx-swap="innerHTML"
+            hx-indicator="#ai-spinner">
+        {% csrf_token %}
+        <div class="row g-3">
+          <div class="col-md-8">
+            <label class="form-label" for="ai-client">Client</label>
+            <select class="form-select" name="client" id="ai-client" required>
+              <option value="">Choose a client...</option>
+              {% for c in clients %}
+                <option value="{{ c.id }}" {% if selected and selected.id == c.id %}selected{% endif %}>
+                  {{ c.full_name }} · {{ c.get_goal_display }}
+                </option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label" for="ai-weeks">Weeks</label>
+            <input class="form-control" type="number" name="weeks" id="ai-weeks" value="4" min="1" max="16" />
+          </div>
+        </div>
+
+        <div class="d-flex align-items-center gap-3 mt-3">
+          <button type="submit" class="btn btn-primary">
+            <i class="bi bi-stars me-1"></i> Generate plan
+          </button>
+          <span id="ai-spinner" class="htmx-indicator small text-muted-warm">
+            <span class="spinner-border spinner-border-sm align-middle me-1"></span>
+            Thinking...
+          </span>
+        </div>
+      </form>
+
+      <div id="ai-result" class="mt-4"></div>
+
+      <div class="mt-4 p-3 small text-ink-soft" style="background: var(--tf-bg-cream); border-left: 3px solid var(--tf-blue); border-radius: 4px;">
+        <strong>Responsible AI.</strong> Always review the generated plan with your
+        professional judgement before assigning it to a client.
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+

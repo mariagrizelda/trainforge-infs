@@ -1,0 +1,55 @@
+{% load tf_extras %}
+
+<div class="border rounded-3 p-3 tf-reveal" style="background: var(--tf-bg-cream);">
+  <div class="d-flex justify-content-between align-items-start mb-2">
+    <div>
+      <div class="tf-mono text-uppercase small text-muted-warm" style="font-size:10px;">Draft for</div>
+      <div class="font-display fs-4">{{ client.full_name }}</div>
+    </div>
+    <span class="pill pill-pink"><i class="bi bi-stars"></i> AI DRAFT</span>
+  </div>
+
+  <h3 class="font-display fs-5 mb-1">{{ plan.name }}</h3>
+  <p class="small text-ink-soft mb-3">{{ plan.rationale }}</p>
+
+  <div class="d-flex gap-2 small text-muted-warm mb-3">
+    <span class="tf-mono">{{ plan.weeks }} weeks</span>
+    <span>·</span>
+    <span class="tf-mono">{{ plan.days|length }} workout days</span>
+  </div>
+
+  <div class="d-flex flex-column gap-3">
+    {% for day in plan.days %}
+      <div class="bg-white p-3 rounded-3">
+        <div class="font-display fs-6 mb-2">{{ day.label }}</div>
+        <ol class="ps-3 mb-0 small">
+          {% for ex in day.exercises %}
+            <li class="mb-1">
+              <span class="fw-medium">
+                {{ exercise_names|get_item:ex.exercise_id|default:"Unknown exercise" }}
+              </span>
+              <span class="tf-mono text-muted-warm ms-2">{{ ex.sets }} × {{ ex.reps }} · {{ ex.rest_seconds }}s</span>
+              {% if ex.coaching_notes %}<div class="text-ink-soft" style="font-size:12px;">{{ ex.coaching_notes }}</div>{% endif %}
+            </li>
+          {% endfor %}
+        </ol>
+      </div>
+    {% endfor %}
+  </div>
+
+  <div class="d-flex justify-content-end gap-2 mt-3">
+    <button class="btn btn-outline-ink"
+            hx-post="{% url 'ai_plan_generate' %}"
+            hx-include="#genForm"
+            hx-target="#ai-result"
+            hx-indicator="#ai-spinner">
+      <i class="bi bi-arrow-repeat me-1"></i>Regenerate
+    </button>
+    <button class="btn btn-primary"
+            hx-post="{% url 'ai_plan_save' %}"
+            hx-target="#ai-result"
+            hx-swap="innerHTML">
+      <i class="bi bi-check-lg me-1"></i>Save plan
+    </button>
+  </div>
+</div>

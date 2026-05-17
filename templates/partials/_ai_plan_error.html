@@ -1,0 +1,10 @@
+<div class="d-flex align-items-start gap-2 p-3" style="background: #fff; color: var(--tf-ink); border: 1px solid var(--tf-line); border-left: 3px solid var(--tf-pink); border-radius: 4px;">
+  <i class="bi bi-exclamation-circle fs-5"></i>
+  <div>
+    <strong>Couldn't generate the plan.</strong>
+    <div class="small mt-1">{{ error }}</div>
+    <div class="small mt-2">
+      <a href="{% url 'plan_create' client_id=client.id %}" class="text-decoration-underline">Build it manually instead</a>.
+    </div>
+  </div>
+</div>
