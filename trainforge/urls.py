@@ -3,12 +3,17 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 
-urlpatterns = [
+inner = [
     path("admin/", admin.site.urls),
     path("accounts/", include("allauth.urls")),
     path("api/", include("core.api_urls")),
     path("", include("core.urls")),
 ]
+
+if settings.URL_PREFIX:
+    urlpatterns = [path(f"{settings.URL_PREFIX}/", include(inner))]
+else:
+    urlpatterns = inner
 
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
