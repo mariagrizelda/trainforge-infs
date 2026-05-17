@@ -1,0 +1,110 @@
+
+<div class="card tf-card p-4 tf-reveal">
+  <div class="d-flex align-items-start gap-3 mb-3">
+    <div class="tf-avatar tf-avatar-lg" style="background: {{ client.avatar_color|default:'#94C2DA' }};">{{ client.initials }}</div>
+    <div class="flex-grow-1">
+      <div class="d-flex align-items-center gap-2 mb-1">
+        <h2 class="font-display fs-2 mb-0">{{ client.full_name }}</h2>
+      </div>
+      <div class="text-ink-soft small">
+        {{ client.get_goal_display }} · {{ client.weekly_frequency }} days/week
+        {% if client.email %}· {{ client.email }}{% endif %}
+      </div>
+    </div>
+    <div class="dropdown">
+      <button class="btn btn-outline-ink btn-sm" data-bs-toggle="dropdown">
+        <i class="bi bi-three-dots"></i>
+      </button>
+      <ul class="dropdown-menu dropdown-menu-end">
+        <li><a class="dropdown-item" href="{% url 'client_edit' client.id %}"><i class="bi bi-pencil me-2"></i>Edit profile</a></li>
+        <li><a class="dropdown-item" href="{% url 'plan_create' client_id=client.id %}"><i class="bi bi-clipboard-check me-2"></i>Make a plan</a></li>
+        <li><a class="dropdown-item" href="{% url 'appointment_create' %}?client={{ client.id }}"><i class="bi bi-calendar-plus me-2"></i>Schedule session</a></li>
+        <li><a class="dropdown-item" href="{% url 'progress' client_id=client.id %}"><i class="bi bi-graph-up me-2"></i>Progress</a></li>
+        <li><hr class="dropdown-divider"></li>
+        <li>
+          <form method="post" action="{% url 'client_archive' client.id %}" onsubmit="return confirm('Delete this client and all of their plans, appointments and session logs? This cannot be undone.');">{% csrf_token %}
+            <button type="submit" class="dropdown-item text-danger"><i class="bi bi-trash me-2"></i>Delete client</button>
+          </form>
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  {% if client.active_plan %}
+    {% with plan=client.active_plan %}
+    <div class="p-3 rounded-3 mb-3" style="background: var(--tf-bg-cream);">
+      <div class="d-flex justify-content-between mb-2">
+        <div>
+          <div class="tf-mono text-uppercase small text-muted-warm" style="font-size:10px;">Current plan</div>
+          <div class="font-display fs-5">{{ plan.name }}</div>
+        </div>
+        <a href="{% url 'plan_detail' plan.id %}" class="btn btn-outline-ink btn-sm">Open plan</a>
+      </div>
+      <div class="d-flex align-items-center gap-2 small text-ink-soft mb-2">
+        Week {{ plan.current_week }} of {{ plan.weeks }} · {{ plan.days.count }} workouts
+      </div>
+      <div class="tf-progress"><div class="tf-progress-fill" style="width: {{ plan.progress_pct }}%;"></div></div>
+    </div>
+    {% endwith %}
+  {% else %}
+    <div class="p-3 rounded-3 mb-3 border border-dashed border-tf-line text-center" style="background: var(--tf-bg-cream);">
+      <div class="text-ink-soft mb-2">No active training plan.</div>
+      <a href="{% url 'plan_create' client_id=client.id %}" class="btn btn-primary btn-sm"><i class="bi bi-clipboard-plus me-1"></i>Make a plan</a>
+      <a href="{% url 'ai_plan_page' %}?client={{ client.id }}" class="btn btn-outline-ink btn-sm"><i class="bi bi-stars me-1"></i>Generate with AI</a>
+    </div>
+  {% endif %}
+
+  <div class="row g-2 mb-3 small">
+    <div class="col-md-6">
+      <div class="tf-mono text-uppercase text-muted-warm small mb-1" style="font-size:10px;">Equipment</div>
+      <div>{{ client.available_equipment|default:"—" }}</div>
+    </div>
+    <div class="col-md-6">
+      <div class="tf-mono text-uppercase text-muted-warm small mb-1" style="font-size:10px;">Preferred times</div>
+      <div>{{ client.preferred_times|default:"—" }}</div>
+    </div>
+    {% if client.injuries %}
+      <div class="col-12">
+        <div class="tf-mono text-uppercase text-muted-warm small mb-1" style="font-size:10px;">Injuries / restrictions</div>
+        <div>{{ client.injuries }}</div>
+      </div>
+    {% endif %}
+    {% if client.notes %}
+      <div class="col-12">
+        <div class="tf-mono text-uppercase text-muted-warm small mb-1" style="font-size:10px;">Notes</div>
+        <div>{{ client.notes|linebreaksbr }}</div>
+      </div>
+    {% endif %}
+  </div>
+
+  <div class="row g-3">
+    <div class="col-md-6">
+      <div class="font-display mb-2">Upcoming</div>
+      {% for a in upcoming %}
+        <div class="d-flex justify-content-between small mb-2">
+          <div>
+            <div>{{ a.start_at|date:"l" }} · {{ a.start_at|time:"H:i" }}</div>
+            <div class="text-muted-warm">{% if a.plan_day %}{{ a.plan_day.label }}{% else %}Session{% endif %}</div>
+          </div>
+          <div class="text-muted-warm tf-mono">{{ a.duration_minutes }} min</div>
+        </div>
+      {% empty %}
+        <div class="text-muted-warm small">No sessions scheduled.</div>
+      {% endfor %}
+    </div>
+    <div class="col-md-6">
+      <div class="font-display mb-2">Recent sessions</div>
+      {% for s in recent_sessions %}
+        <div class="d-flex justify-content-between small mb-2">
+          <div>
+            <div>{{ s.performed_on|date:"j M" }}</div>
+            <div class="text-muted-warm">{% if s.plan_day %}{{ s.plan_day.label }}{% else %}Workout{% endif %}</div>
+          </div>
+          <div class="text-muted-warm tf-mono">{{ s.sets.count }} sets</div>
+        </div>
+      {% empty %}
+        <div class="text-muted-warm small">No sessions logged yet.</div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
