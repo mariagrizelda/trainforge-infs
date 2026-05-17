@@ -1,0 +1,162 @@
+{% extends "_app_shell.html" %}
+
+{% block title %}Dashboard — TrainForge{% endblock %}
+{% block page_label %}Dashboard{% endblock %}
+
+{% block topbar_actions %}
+  <a href="{% url 'client_create' %}" class="btn btn-outline-ink d-none d-md-inline-flex align-items-center gap-2">
+    <i class="bi bi-plus-lg"></i> Add client
+  </a>
+  <a href="{% url 'ai_plan_page' %}" class="btn btn-primary d-inline-flex align-items-center gap-2">
+    <i class="bi bi-stars"></i> New AI plan
+  </a>
+{% endblock %}
+
+{% block content %}
+<div class="tf-reveal">
+
+  <section class="tf-section">
+    <div class="tf-eyebrow">{{ today|date:"l, j F Y" }}</div>
+    <h1>{{ request.user.full_name|default:request.user.email|cut:"@" }}</h1>
+    <p class="text-ink-soft mb-0">
+      {% if today_appts %}
+        {{ today_appts|length }} session{{ today_appts|length|pluralize }} scheduled today{% if next_up %}, next at {{ next_up.start_at|time:"H:i" }}{% endif %}.
+      {% else %}
+        No sessions scheduled today.
+      {% endif %}
+    </p>
+  </section>
+
+  <section class="tf-section">
+    <div class="tf-stats">
+      <div class="tf-stat">
+        <div class="tf-stat-label">Active clients</div>
+        <div class="tf-stat-value">{{ stat_active }}</div>
+      </div>
+      <div class="tf-stat">
+        <div class="tf-stat-label">Sessions this week</div>
+        <div class="tf-stat-value">{{ stat_completed_week }}<span class="text-muted-warm" style="font-size:18px;">/{{ stat_week_appts }}</span></div>
+        <div class="tf-stat-meta">completed</div>
+      </div>
+      <div class="tf-stat">
+        <div class="tf-stat-label">AI plans</div>
+        <div class="tf-stat-value">{{ stat_ai_plans }}</div>
+        <div class="tf-stat-meta">this month</div>
+      </div>
+      <div class="tf-stat">
+        <div class="tf-stat-label">New PRs</div>
+        <div class="tf-stat-value">{{ stat_new_prs }}</div>
+        <div class="tf-stat-meta">last 7 days</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="tf-section">
+    <div class="tf-section-head">
+      <div>
+        <div class="tf-eyebrow">Today</div>
+        <h2 class="fs-3 mb-0">Sessions</h2>
+      </div>
+      <a href="{% url 'calendar' %}" class="text-blue small">Open calendar →</a>
+    </div>
+
+    {% if next_up %}
+      <div class="tf-next-card">
+        <div>
+          <div class="tf-next-label">Next up</div>
+          <div class="d-flex align-items-baseline gap-3">
+            <div class="tf-next-time">{{ next_up.start_at|time:"H:i" }}</div>
+            <div>
+              <div class="tf-next-name">{{ next_up.client.full_name }}</div>
+              <div class="tf-next-meta">
+                {% if next_up.plan_day %}{{ next_up.plan_day.label }} · {% endif %}{{ next_up.duration_minutes }} min{% if next_up.location %} · {{ next_up.location }}{% endif %}
+              </div>
+            </div>
+          </div>
+        </div>
+        <a href="{% url 'appointment_edit' next_up.id %}" class="btn">Open</a>
+      </div>
+
+      <div class="tf-day-track" aria-label="Today's session timeline">
+        {% for entry in timeline %}
+          <a href="{% url 'appointment_edit' entry.appt.id %}"
+             class="tf-day-block {% if entry.is_next %}next{% endif %}"
+             style="left: {{ entry.left_pct }}%; width: calc({{ entry.width_pct }}% - 4px);">
+            <div class="tf-db-time">{{ entry.appt.start_at|time:"H:i" }} · {{ entry.appt.duration_minutes }}m</div>
+            <div class="tf-db-name">{{ entry.appt.client.full_name }}</div>
+          </a>
+        {% endfor %}
+      </div>
+      <div class="tf-day-axis" aria-hidden="true">
+        <span>08</span><span>09</span><span>10</span><span>11</span>
+        <span>12</span><span>13</span><span>14</span><span>15</span>
+        <span>16</span><span>17</span><span>18</span><span>19</span>
+      </div>
+
+    {% else %}
+      <div class="empty-state" style="padding: 28px 0;">
+        <i class="bi bi-calendar-x display-6 d-block mb-2 text-muted-warm"></i>
+        <div class="mb-3">No sessions scheduled for today.</div>
+        <a href="{% url 'appointment_create' %}" class="btn btn-primary"><i class="bi bi-plus-lg me-1"></i>Schedule one</a>
+      </div>
+    {% endif %}
+  </section>
+
+  <section class="tf-section">
+    <div class="row g-5">
+      <div class="col-lg-6">
+        <div class="tf-section-head">
+          <div>
+            <div class="tf-eyebrow">Recent</div>
+            <h2 class="fs-4 mb-0">Activity</h2>
+          </div>
+        </div>
+        {% if recent_activity %}
+          <div>
+            {% for s in recent_activity %}
+              <div class="tf-feed-item">
+                <span class="tf-feed-dot bg-tf-blue"></span>
+                <div class="flex-grow-1">
+                  <div><span class="fw-medium">Session logged</span> · {{ s.client.full_name }}</div>
+                  <div class="small text-ink-soft">{% if s.plan_day %}{{ s.plan_day.label }}{% else %}Workout{% endif %} · {{ s.performed_on|date:"j M" }}</div>
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <div class="text-muted-warm small">No activity yet.</div>
+        {% endif %}
+      </div>
+
+      <div class="col-lg-6">
+        <div class="tf-section-head">
+          <div>
+            <div class="tf-eyebrow">Watchlist</div>
+            <h2 class="fs-4 mb-0">Might need a nudge</h2>
+          </div>
+          <a href="{% url 'clients' %}" class="text-blue small">All clients →</a>
+        </div>
+        {% if attention %}
+          <div>
+            {% for c, reason in attention %}
+              <div class="tf-feed-item">
+                <div class="tf-avatar tf-avatar-sm" style="background: {{ c.avatar_color|default:'#94C2DA' }};">{{ c.initials }}</div>
+                <div class="flex-grow-1">
+                  <div class="d-flex justify-content-between align-items-baseline gap-2">
+                    <div class="fw-medium">{{ c.full_name }}</div>
+                    <a href="{% url 'client_detail' c.id %}" class="text-blue small">Open</a>
+                  </div>
+                  <div class="small text-ink-soft">{{ reason }}</div>
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <div class="text-muted-warm small">Everyone's on track.</div>
+        {% endif %}
+      </div>
+    </div>
+  </section>
+
+</div>
+{% endblock %}
