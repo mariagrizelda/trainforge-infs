@@ -167,11 +167,3 @@ Quick smoke run:
 python manage.py check
 python manage.py test  # (no test cases yet — add as needed)
 ```
-
-## Use of generative AI
-
-Per the assessment brief, this codebase was built with the assistance of
-**Claude (Anthropic)** acting as a coding agent. All architectural decisions, model
-fields, view structure, and UI layout choices were reviewed and edited by the student.
-Mockups in `mockups/` were authored in Tailwind by the student previously; the
-templates here re-implement them in Bootstrap.
