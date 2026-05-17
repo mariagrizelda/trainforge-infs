@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block body %}
+<div class="app-layout">
+
+  <aside class="tf-sidebar">
+    <div class="d-flex align-items-center gap-2 px-2 mb-4">
+      <span class="tf-logo-dot"></span>
+      <span class="font-display fs-3">Trainforge</span>
+    </div>
+
+    <div class="mb-2">
+      <div class="text-uppercase small px-3 mb-2" style="letter-spacing:.08em; font-size:10px; color: var(--tf-side-text-mute);">Operations</div>
+      <nav class="d-flex flex-column gap-1">
+        <a href="{% url 'admin_dashboard' %}" class="tf-nav-item {% if active_nav == 'admin_overview' %}active{% endif %}">
+          <i class="bi bi-speedometer2"></i> Overview
+        </a>
+        <a href="{% url 'admin_plans' %}" class="tf-nav-item {% if active_nav == 'admin_plans' %}active{% endif %}">
+          <i class="bi bi-card-list"></i> Subscription plans
+        </a>
+        <a href="{% url 'admin_trainers' %}" class="tf-nav-item {% if active_nav == 'admin_trainers' %}active{% endif %}">
+          <i class="bi bi-people"></i> Trainers
+        </a>
+      </nav>
+    </div>
+
+    <div class="mt-4">
+      <div class="text-uppercase small px-3 mb-2" style="letter-spacing:.08em; font-size:10px; color: var(--tf-side-text-mute);">Tools</div>
+      <nav class="d-flex flex-column gap-1">
+        <a href="/admin/" class="tf-nav-item">
+          <i class="bi bi-gear"></i> Django admin
+        </a>
+      </nav>
+    </div>
+
+    <div class="mt-auto pt-3">
+      <div class="card tf-card p-2 d-flex flex-row align-items-center gap-2">
+        <div class="tf-avatar tf-avatar-sm" style="background: #fff; color: var(--tf-blue-deep);">{{ request.user.initials }}</div>
+        <div class="flex-grow-1 small text-truncate">
+          <div class="fw-medium text-truncate">{{ request.user.full_name|default:request.user.email }}</div>
+          <div class="text-muted-warm" style="font-size:11px;">SaaS admin</div>
+        </div>
+        <a href="{% url 'logout' %}" class="tf-sidebar-logout" title="Sign out" aria-label="Sign out">
+          <i class="bi bi-box-arrow-right"></i>
+        </a>
+      </div>
+    </div>
+  </aside>
+
+  <div class="d-flex flex-column min-vh-100">
+    <div class="tf-topbar">
+      <button class="btn d-lg-none border-0 p-2" type="button" data-bs-toggle="offcanvas" data-bs-target="#mobileMenu">
+        <i class="bi bi-list fs-4"></i>
+      </button>
+      <div class="d-lg-none d-flex align-items-center gap-2">
+        <span class="tf-logo-dot" style="width:20px;height:20px;"></span>
+        <span class="font-display fs-5">Trainforge</span>
+      </div>
+      <div class="d-none d-lg-block">
+        <div class="tf-mono text-uppercase text-muted-warm small" style="letter-spacing:.08em; font-size:10px;">Admin console</div>
+        <div class="font-display fs-5">{% block page_label %}{% endblock %}</div>
+      </div>
+      <div class="d-flex align-items-center gap-2">
+        {% block topbar_actions %}{% endblock %}
+      </div>
+    </div>
+
+    <div class="offcanvas offcanvas-start" tabindex="-1" id="mobileMenu">
+      <div class="offcanvas-header">
+        <h5 class="offcanvas-title font-display">Admin</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
+      </div>
+      <div class="offcanvas-body">
+        <nav class="d-flex flex-column gap-1">
+          <a href="{% url 'admin_dashboard' %}" class="tf-nav-item"><i class="bi bi-speedometer2"></i> Overview</a>
+          <a href="{% url 'admin_plans' %}" class="tf-nav-item"><i class="bi bi-card-list"></i> Plans</a>
+          <a href="{% url 'admin_trainers' %}" class="tf-nav-item"><i class="bi bi-people"></i> Trainers</a>
+          <a href="/admin/" class="tf-nav-item"><i class="bi bi-gear"></i> Django admin</a>
+          <hr/>
+          <a href="{% url 'logout' %}" class="tf-nav-item"><i class="bi bi-box-arrow-right"></i> Sign out</a>
+        </nav>
+      </div>
+    </div>
+
+    <main class="tf-main flex-grow-1">
+      {% block content %}{% endblock %}
+    </main>
+
+  </div>
+</div>
+{% endblock %}

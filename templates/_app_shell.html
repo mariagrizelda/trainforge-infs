@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block body %}
+<div class="app-layout">
+
+  <aside class="tf-sidebar">
+    <div class="d-flex align-items-center gap-2 px-2 mb-4">
+      <span class="tf-logo-dot"></span>
+      <span class="font-display fs-3">Trainforge</span>
+    </div>
+
+    <div class="mb-2">
+      <div class="text-uppercase small px-3 mb-2" style="letter-spacing:.08em; font-size:10px; color: var(--tf-side-text-mute);">Workspace</div>
+      <nav class="d-flex flex-column gap-1">
+        <a href="{% url 'dashboard' %}" class="tf-nav-item {% if active_nav == 'dashboard' %}active{% endif %}">
+          <i class="bi bi-grid-1x2"></i> Dashboard
+        </a>
+        <a href="{% url 'clients' %}" class="tf-nav-item {% if active_nav == 'clients' %}active{% endif %}">
+          <i class="bi bi-people"></i> Clients
+          {% if client_count is not None %}<span class="tf-nav-count">{{ client_count }}</span>{% endif %}
+        </a>
+        <a href="{% url 'exercises' %}" class="tf-nav-item {% if active_nav == 'exercises' %}active{% endif %}">
+          <i class="bi bi-grid-3x3-gap"></i> Exercise library
+          {% if exercise_count is not None %}<span class="tf-nav-count">{{ exercise_count }}</span>{% endif %}
+        </a>
+        <a href="{% url 'calendar' %}" class="tf-nav-item {% if active_nav == 'calendar' %}active{% endif %}">
+          <i class="bi bi-calendar3"></i> Calendar
+        </a>
+        <a href="{% url 'progress_index' %}" class="tf-nav-item {% if active_nav == 'progress' %}active{% endif %}">
+          <i class="bi bi-graph-up"></i> Progress
+        </a>
+      </nav>
+    </div>
+
+    <div class="mt-4">
+      <div class="text-uppercase small px-3 mb-2" style="letter-spacing:.08em; font-size:10px; color: var(--tf-side-text-mute);">Tools</div>
+      <nav class="d-flex flex-column gap-1">
+        <a href="{% url 'ai_plan_page' %}" class="tf-nav-item {% if active_nav == 'ai' %}active{% endif %}">
+          <i class="bi bi-stars" style="color: #FFB7D7;"></i> AI plan generator
+          <span class="ms-auto small px-2 py-0 rounded" style="background:rgba(255,255,255,0.18); color:#fff; font-size:9px; letter-spacing:.06em;">NEW</span>
+        </a>
+      </nav>
+    </div>
+
+    <div class="mt-auto pt-3">
+      <div class="card tf-card p-2 d-flex flex-row align-items-center gap-2">
+        <div class="tf-avatar tf-avatar-sm" style="background: #fff; color: var(--tf-blue-deep);">{{ request.user.initials }}</div>
+        <div class="flex-grow-1 small text-truncate">
+          <div class="fw-medium text-truncate">{{ request.user.full_name|default:request.user.email }}</div>
+          <div class="text-muted-warm" style="font-size:11px;">
+            {% if request.user.subscription %}{{ request.user.subscription.plan.name }}{% else %}Solo plan{% endif %}
+          </div>
+        </div>
+        <a href="{% url 'logout' %}" class="tf-sidebar-logout" title="Sign out" aria-label="Sign out">
+          <i class="bi bi-box-arrow-right"></i>
+        </a>
+      </div>
+    </div>
+  </aside>
+
+  <div class="d-flex flex-column min-vh-100">
+
+    <div class="tf-topbar">
+      <button class="btn d-lg-none border-0 p-2" type="button" data-bs-toggle="offcanvas" data-bs-target="#mobileMenu">
+        <i class="bi bi-list fs-4"></i>
+      </button>
+      <div class="d-lg-none d-flex align-items-center gap-2">
+        <span class="tf-logo-dot" style="width:20px;height:20px;"></span>
+        <span class="font-display fs-5">Trainforge</span>
+      </div>
+
+      <div class="d-none d-lg-block">
+        <div class="tf-mono text-uppercase text-muted-warm small" style="letter-spacing:.08em; font-size:10px;">Workspace</div>
+        <div class="font-display fs-5">{% block page_label %}{% endblock %}</div>
+      </div>
+
+      <div class="d-flex align-items-center gap-2">
+        {% block topbar_actions %}{% endblock %}
+      </div>
+    </div>
+
+    <div class="offcanvas offcanvas-start" tabindex="-1" id="mobileMenu">
+      <div class="offcanvas-header">
+        <h5 class="offcanvas-title font-display">TrainForge</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
+      </div>
+      <div class="offcanvas-body">
+        <nav class="d-flex flex-column gap-1">
+          <a href="{% url 'dashboard' %}" class="tf-nav-item"><i class="bi bi-grid-1x2"></i> Dashboard</a>
+          <a href="{% url 'clients' %}" class="tf-nav-item"><i class="bi bi-people"></i> Clients</a>
+          <a href="{% url 'exercises' %}" class="tf-nav-item"><i class="bi bi-grid-3x3-gap"></i> Exercises</a>
+          <a href="{% url 'calendar' %}" class="tf-nav-item"><i class="bi bi-calendar3"></i> Calendar</a>
+          <a href="{% url 'progress_index' %}" class="tf-nav-item"><i class="bi bi-graph-up"></i> Progress</a>
+          <a href="{% url 'ai_plan_page' %}" class="tf-nav-item"><i class="bi bi-stars"></i> AI plan</a>
+          <hr/>
+          <a href="{% url 'logout' %}" class="tf-nav-item"><i class="bi bi-box-arrow-right"></i> Sign out</a>
+        </nav>
+      </div>
+    </div>
+
+    <main class="tf-main flex-grow-1">
+      {% block content %}{% endblock %}
+    </main>
+
+  </div>
+</div>
+{% endblock %}
