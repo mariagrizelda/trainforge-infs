@@ -6,6 +6,7 @@ import random
 
 from allauth.account.adapter import DefaultAccountAdapter
 from allauth.socialaccount.adapter import DefaultSocialAccountAdapter
+from django.urls import reverse
 
 AVATAR_COLORS = [
     "#1F3A8A",
@@ -23,6 +24,12 @@ def _pick_color(seed: str) -> str:
     rng = random.Random(seed or "tf")
     return rng.choice(AVATAR_COLORS)
 
+def _role_home(user) -> str:
+    if user is not None and getattr(user, "role", "") == "admin":
+        return reverse("admin_dashboard")
+    return reverse("dashboard")
+
+
 class TFAccountAdapter(DefaultAccountAdapter):
 
     def save_user(self, request, user, form, commit=True):
@@ -37,6 +44,16 @@ class TFAccountAdapter(DefaultAccountAdapter):
         if commit:
             user.save()
         return user
+
+    def get_login_redirect_url(self, request):
+        return _role_home(getattr(request, "user", None))
+
+    def get_signup_redirect_url(self, request):
+        return _role_home(getattr(request, "user", None))
+
+    def get_logout_redirect_url(self, request):
+        return reverse("landing")
+
 
 class TFSocialAccountAdapter(DefaultSocialAccountAdapter):
 
@@ -69,3 +86,6 @@ class TFSocialAccountAdapter(DefaultSocialAccountAdapter):
             user.avatar_color = _pick_color(email or user.username)
 
         return user
+
+    def get_connect_redirect_url(self, request, socialaccount):
+        return _role_home(getattr(request, "user", None))
